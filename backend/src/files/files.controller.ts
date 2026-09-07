@@ -1,13 +1,14 @@
 import {
   Body,
   Controller,
-  Post,
-  Req,
-  UseGuards,
+  Delete,
   Get,
   Param,
   Patch,
-  Delete,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 
 import { FilesService } from './files.service';
@@ -31,6 +32,7 @@ export class FilesController {
       dto.folderId,
     );
   }
+  
   @UseGuards(JwtAuthGuard)
   @Post('upload/complete')
   completeUpload(@Body() dto: CompleteUploadDto, @Req() request: any) {
@@ -43,11 +45,16 @@ export class FilesController {
       dto.folderId,
     );
   }
+
   @Get()
   @UseGuards(JwtAuthGuard)
-  getUserFiles(@Req() request: any) {
-    return this.filesService.getUserFiles(request.user.userId);
+  getUserFiles(
+    @Query('folderId') folderId: string | undefined,
+    @Req() request: any,
+  ) {
+    return this.filesService.getUserFiles(request.user.userId, folderId);
   }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   getFile(@Param('id') id: string, @Req() request: any) {

@@ -1,4 +1,11 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsInt,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CompleteUploadDto {
   @IsString()
@@ -18,6 +25,6 @@ export class CompleteUploadDto {
   key: string;
 
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   folderId?: string;
 }

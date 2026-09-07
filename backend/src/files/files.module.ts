@@ -7,10 +7,12 @@ import { FilesService } from './files.service';
 import { StorageModule } from '../storage/storage.module';
 
 import { File, FileSchema } from './schemas/file.schema';
+import { FoldersModule } from '../folders/folders.module';
 
 @Module({
   imports: [
     StorageModule,
+    FoldersModule,
 
     MongooseModule.forFeature([
       {

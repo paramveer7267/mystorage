@@ -1,4 +1,11 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsInt,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateUploadDto {
   @IsString()
@@ -14,6 +21,6 @@ export class CreateUploadDto {
   size: number;
 
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   folderId?: string;
 }

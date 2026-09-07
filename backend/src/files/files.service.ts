@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { File, FileDocument } from './schemas/file.schema';
 import { StorageService } from '../storage/storage.service';
+import { FoldersService } from '../folders/folders.service';
 
 @Injectable()
 export class FilesService {
@@ -12,8 +13,21 @@ export class FilesService {
     private readonly fileModel: Model<FileDocument>,
 
     private readonly storageService: StorageService,
+
+    private readonly foldersService: FoldersService,
   ) {}
 
+  private async validateFolder(userId: string, folderId?: string) {
+    if (!folderId) {
+      return;
+    }
+
+    const folder = await this.foldersService.findFolder(userId, folderId);
+
+    if (!folder) {
+      throw new NotFoundException('Folder not found');
+    }
+  }
   async createUpload(
     userId: string,
     fileName: string,
@@ -21,6 +35,7 @@ export class FilesService {
     size: number,
     folderId?: string,
   ) {
+    await this.validateFolder(userId, folderId);
     const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
 
     const key = `users/${userId}/files/` + `${Date.now()}-${safeFileName}`;
@@ -44,6 +59,7 @@ export class FilesService {
     key: string,
     folderId?: string,
   ) {
+    await this.validateFolder(userId, folderId);
     return this.fileModel.create({
       name: fileName,
       originalName: fileName,
@@ -54,9 +70,17 @@ export class FilesService {
       folderId: folderId || null,
     });
   }
-  async getUserFiles(userId: string) {
-    return this.fileModel.find({ userId }).sort({ createdAt: -1 }).lean();
+
+  async getUserFiles(userId: string, folderId?: string) {
+    return this.fileModel
+      .find({
+        userId,
+        folderId: folderId ? new Types.ObjectId(folderId) : null,
+      })
+      .sort({ createdAt: -1 })
+      .lean();
   }
+
   async getFile(userId: string, fileId: string) {
     const file = await this.fileModel.findOne({
       _id: fileId,
